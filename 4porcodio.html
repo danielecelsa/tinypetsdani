@@ -6,54 +6,65 @@ layout: page
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cat or Dog Classifier</title>
-  <script type="module" defer>
-    import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
-
-    async function handleImageUpload(event) {
-      console.log("Image upload function triggered."); // Log iniziale
-      const file = event.target.files[0]; // Otteniamo il file caricato
-      if (!file) {
-        console.log("No file uploaded.");
-        alert("Please upload an image!");
-        return;
-      }
-
-      console.log("File uploaded: ", file.name); // Nome del file caricato
-
-      try {
-        // Mostra un messaggio di caricamento
-        const output = document.getElementById("output");
-        output.textContent = "Processing...";
-
-        // Connessione allo space su HuggingFace
-        const client = await Client.connect("danielecelsa/cat-dog-final");
-
-        // Predizione tramite API
-        const result = await client.predict("/predict", {
-          immagine: file, // Passiamo il file direttamente
-        });
-
-        // Mostriamo il risultato
-        console.log("Prediction result: ", result); // Log del risultato
-        const prediction = result.data ? JSON.stringify(result.data) : "No prediction";
-        output.textContent = `Prediction: ${prediction}`;
-      } catch (error) {
-        console.error("Error during prediction: ", error); // Log degli errori
-        alert("An error occurred while processing the image.");
-      }
-    }
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat or Dog Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2em;
+        }
+        #result {
+            margin-top: 1em;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        #file-input {
+            margin-top: 1em;
+        }
+    </style>
 </head>
 <body>
-  <div style="text-align: center; padding: 20px;">
-    <h1>Cat or Dog Classifier</h1>
-    <p>Upload an image to classify whether it's a cat or a dog!</p>
-    <input type="file" accept="image/*" id="image-upload" onchange="handleImageUpload(event)">
-    <p id="output" style="margin-top: 20px; font-size: 1.2em;"></p>
-  </div>
+    <h1>Cat or Dog Predictor</h1>
+    <p>Carica un'immagine e scopri se è un cane o un gatto!</p>
+
+    <input type="file" id="file-input" accept="image/*">
+    <div id="result">La predizione apparirà qui.</div>
+
+    <script type="module">
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const fileInput = document.getElementById("file-input");
+            const resultDiv = document.getElementById("result");
+
+            async function handleImageUpload(event) {
+                const file = event.target.files[0];
+                if (!file) {
+                    resultDiv.textContent = "Per favore, carica un'immagine valida.";
+                    return;
+                }
+
+                try {
+                    // Connessione allo Space su HuggingFace
+                    const client = await Client("https://huggingface.co/spaces/danielecelsa/cat-dog-final");
+                    
+                    // Effettua la richiesta di previsione
+                    const result = await client.predict("/predict", {
+                        immagine: file,
+                    });
+
+                    // Mostra la predizione nel DOM
+                    const prediction = result.data[0]; // Accesso al risultato
+                    resultDiv.textContent = `Predizione: ${JSON.stringify(prediction)}`;
+                } catch (error) {
+                    console.error("Errore durante la previsione:", error);
+                    resultDiv.textContent = "Errore durante la previsione. Riprova.";
+                }
+            }
+
+            fileInput.addEventListener("change", handleImageUpload);
+        });
+    </script>
 </body>
 </html>
-
