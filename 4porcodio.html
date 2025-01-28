@@ -23,6 +23,8 @@ layout: page
             margin-top: 1em;
         }
     </style>
+    <!-- Importa la libreria gradio-client -->
+    <script src="https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.js"></script>
 </head>
 <body>
     <h1>Cat or Dog Predictor</h1>
@@ -31,9 +33,7 @@ layout: page
     <input type="file" id="file-input" accept="image/*">
     <div id="result">La predizione apparirà qui.</div>
 
-    <script type="module">
-        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
-
+    <script>
         document.addEventListener("DOMContentLoaded", () => {
             const fileInput = document.getElementById("file-input");
             const resultDiv = document.getElementById("result");
@@ -47,8 +47,8 @@ layout: page
 
                 try {
                     // Connessione allo Space su HuggingFace
-                    const client = await Client("https://huggingface.co/spaces/danielecelsa/cat-dog-final");
-                    
+                    const client = await gradio.Client("https://huggingface.co/spaces/danielecelsa/cat-dog-final");
+
                     // Effettua la richiesta di previsione
                     const result = await client.predict("/predict", {
                         immagine: file,
