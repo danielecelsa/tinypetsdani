@@ -13,29 +13,35 @@ layout: page
     import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
 
     async function handleImageUpload(event) {
-      const file = event.target.files[0];
+      console.log("Image upload function triggered."); // Log iniziale
+      const file = event.target.files[0]; // Otteniamo il file caricato
       if (!file) {
+        console.log("No file uploaded.");
         alert("Please upload an image!");
         return;
       }
 
+      console.log("File uploaded: ", file.name); // Nome del file caricato
+
       try {
-        // Show a loading message
+        // Mostra un messaggio di caricamento
         const output = document.getElementById("output");
         output.textContent = "Processing...";
 
-        // Connect to HuggingFace Space
+        // Connessione allo space su HuggingFace
         const client = await Client.connect("danielecelsa/cat-dog-final");
 
-        // Send image to the API
+        // Predizione tramite API
         const result = await client.predict("/predict", {
-          immagine: new Blob([file]),
+          immagine: file, // Passiamo il file direttamente
         });
 
-        // Display the result
-        output.textContent = `Prediction: ${JSON.stringify(result.data)}`;
+        // Mostriamo il risultato
+        console.log("Prediction result: ", result); // Log del risultato
+        const prediction = result.data ? JSON.stringify(result.data) : "No prediction";
+        output.textContent = `Prediction: ${prediction}`;
       } catch (error) {
-        console.error(error);
+        console.error("Error during prediction: ", error); // Log degli errori
         alert("An error occurred while processing the image.");
       }
     }
@@ -50,3 +56,4 @@ layout: page
   </div>
 </body>
 </html>
+
